@@ -20,7 +20,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Search, Edit, Eye, Download, FileText, PenTool, Scan, Bot } from "lucide-react"
+import { Plus, Search, Edit, Eye, Download, FileText, PenTool } from "lucide-react"
+
+import AIDocumentAssistant from "./ai-document-assistant"
+import OCRScanner from "./ocr-scanner"
+import PDFViewer from "./pdf-viewer"
 
 interface Document {
   id: string
@@ -208,6 +212,8 @@ export default function DocumentWorkflow() {
       content: "",
     })
 
+    const selectedTemplate = templates.find((t) => t.id === formData.templateId)
+
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault()
       const selectedTemplate = templates.find((t) => t.id === formData.templateId)
@@ -295,15 +301,27 @@ export default function DocumentWorkflow() {
             placeholder="Document content will be generated from template..."
             rows={6}
           />
-          <div className="flex space-x-2 mt-2">
-            <Button type="button" variant="outline" size="sm">
-              <Bot className="h-4 w-4 mr-2" />
-              AI Suggestions
-            </Button>
-            <Button type="button" variant="outline" size="sm">
-              <Scan className="h-4 w-4 mr-2" />
-              OCR Scan
-            </Button>
+          <div className="mt-4 space-y-4">
+            {/* AI Assistant */}
+            <AIDocumentAssistant
+              documentType={selectedTemplate?.type || ""}
+              currentContent={formData.content}
+              onContentUpdate={(content) => setFormData({ ...formData, content })}
+              onSuggestionApply={(suggestion) => {
+                // Apply AI suggestion to content
+                const updatedContent = formData.content + "\n\n" + suggestion.suggestion
+                setFormData({ ...formData, content: updatedContent })
+              }}
+            />
+
+            {/* OCR Scanner */}
+            <OCRScanner
+              onTextExtracted={(text) => {
+                const updatedContent = formData.content + "\n\n" + text
+                setFormData({ ...formData, content: updatedContent })
+              }}
+              onError={(error) => console.error("OCR Error:", error)}
+            />
           </div>
         </div>
 
@@ -327,74 +345,95 @@ export default function DocumentWorkflow() {
           <DialogDescription>Document details and signature tracking</DialogDescription>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <Label className="text-sm font-medium text-gray-500">Status</Label>
-              <div className="mt-1">{getStatusBadge(selectedDocument.status)}</div>
-            </div>
-            <div>
-              <Label className="text-sm font-medium text-gray-500">Type</Label>
-              <p className="text-sm">{selectedDocument.type.replace("_", " ")}</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium text-gray-500">Created</Label>
-              <p className="text-sm">{new Date(selectedDocument.createdDate).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium text-gray-500">Last Modified</Label>
-              <p className="text-sm">{new Date(selectedDocument.lastModified).toLocaleDateString()}</p>
-            </div>
-          </div>
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="signatures">Signatures</TabsTrigger>
+              <TabsTrigger value="preview">PDF Preview</TabsTrigger>
+            </TabsList>
 
-          <div>
-            <Label className="text-sm font-medium text-gray-500">Signature Progress</Label>
-            <div className="mt-2 space-y-2">
-              {selectedDocument.signatures.map((signature) => (
-                <div key={signature.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        signature.status === "signed"
-                          ? "bg-green-500"
-                          : signature.status === "rejected"
-                            ? "bg-red-500"
-                            : "bg-gray-300"
-                      }`}
-                    />
-                    <div>
-                      <p className="font-medium">{signature.signerName}</p>
-                      <p className="text-sm text-gray-500 capitalize">{signature.signerRole.replace("_", " ")}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {signature.signedDate && (
-                      <span className="text-sm text-gray-500">
-                        {new Date(signature.signedDate).toLocaleDateString()}
-                      </span>
-                    )}
-                    <Badge
-                      variant={
-                        signature.status === "signed"
-                          ? "default"
-                          : signature.status === "rejected"
-                            ? "destructive"
-                            : "secondary"
-                      }
-                    >
-                      {signature.status}
-                    </Badge>
-                  </div>
+            <TabsContent value="details" className="space-y-4">
+              {/* Existing details content */}
+              <div className="grid grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Status</Label>
+                  <div className="mt-1">{getStatusBadge(selectedDocument.status)}</div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Type</Label>
+                  <p className="text-sm">{selectedDocument.type.replace("_", " ")}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Created</Label>
+                  <p className="text-sm">{new Date(selectedDocument.createdDate).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Last Modified</Label>
+                  <p className="text-sm">{new Date(selectedDocument.lastModified).toLocaleDateString()}</p>
+                </div>
+              </div>
 
-          <div>
-            <Label className="text-sm font-medium text-gray-500">Document Content</Label>
-            <div className="mt-2 p-4 border rounded-lg bg-gray-50 max-h-60 overflow-y-auto">
-              <p className="text-sm whitespace-pre-wrap">{selectedDocument.content}</p>
-            </div>
-          </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Document Content</Label>
+                <div className="mt-2 p-4 border rounded-lg bg-gray-50 max-h-60 overflow-y-auto">
+                  <p className="text-sm whitespace-pre-wrap">{selectedDocument.content}</p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="signatures" className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Signature Progress</Label>
+                <div className="mt-2 space-y-2">
+                  {selectedDocument.signatures.map((signature) => (
+                    <div key={signature.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            signature.status === "signed"
+                              ? "bg-green-500"
+                              : signature.status === "rejected"
+                                ? "bg-red-500"
+                                : "bg-gray-300"
+                          }`}
+                        />
+                        <div>
+                          <p className="font-medium">{signature.signerName}</p>
+                          <p className="text-sm text-gray-500 capitalize">{signature.signerRole.replace("_", " ")}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {signature.signedDate && (
+                          <span className="text-sm text-gray-500">
+                            {new Date(signature.signedDate).toLocaleDateString()}
+                          </span>
+                        )}
+                        <Badge
+                          variant={
+                            signature.status === "signed"
+                              ? "default"
+                              : signature.status === "rejected"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
+                          {signature.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="preview" className="space-y-4">
+              <PDFViewer
+                file={`/placeholder.pdf`} // In production, this would be the actual PDF URL
+                onError={(error) => console.error("PDF Error:", error)}
+                onLoadSuccess={(numPages) => console.log(`PDF loaded with ${numPages} pages`)}
+              />
+            </TabsContent>
+          </Tabs>
 
           <div className="flex justify-end space-x-2">
             <Button variant="outline">

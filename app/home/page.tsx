@@ -181,7 +181,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-lg px-8 py-3 border-white text-white hover:bg-white hover:text-blue-600"
+                className="text-lg px-8 py-3 border-white text-blue hover:bg-white hover:text-blue-600"
               >
                 Explore Resources
                 <BookOpen className="ml-2 h-5 w-5" />

@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Academic Management System",
-  description: "Internship & Project Management Platform",
+  description: "Internship & Project Management Platform with AI & OCR Tools",
     generator: 'v0.dev'
 }
 
