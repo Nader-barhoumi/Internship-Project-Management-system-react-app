@@ -17,6 +17,8 @@ import {
   Shield,
   Home,
   BookOpen,
+  Bot,
+  Scan,
 } from "lucide-react"
 import StudentManagement from "@/components/student-management"
 import InternshipManagement from "@/components/internship-management"
@@ -36,6 +38,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import QuickActionDialogs from "@/components/quick-action-dialogs"
+import AIDocumentAssistant from "@/components/ai-document-assistant"
+import OCRScanner from "@/components/ocr-scanner"
+import PDFViewer from "@/components/pdf-viewer"
 
 export default function Dashboard() {
   const { user, userRole, isAuthenticated, logout } = useAuth()
@@ -338,6 +343,34 @@ export default function Dashboard() {
             <span className="text-sm">View Internship</span>
           </Button>
         </RoleBasedWrapper>
+
+        {/* Add these new action buttons in the QuickActions grid */}
+        <Button
+          variant="outline"
+          className="h-auto p-4 flex flex-col items-center space-y-2"
+          onClick={() => setActiveTab("ai-tools")}
+        >
+          <Bot className="h-5 w-5" />
+          <span className="text-sm">AI Assistant</span>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="h-auto p-4 flex flex-col items-center space-y-2"
+          onClick={() => setActiveTab("ocr-scanner")}
+        >
+          <Scan className="h-5 w-5" />
+          <span className="text-sm">OCR Scanner</span>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="h-auto p-4 flex flex-col items-center space-y-2"
+          onClick={() => setActiveTab("pdf-tools")}
+        >
+          <FileText className="h-5 w-5" />
+          <span className="text-sm">PDF Tools</span>
+        </Button>
       </CardContent>
     </Card>
   )
@@ -365,6 +398,11 @@ export default function Dashboard() {
     if (permissions.canViewAcademicStaff(userRole)) {
       baseTabs.push({ id: "staff", label: "Academic Staff" })
     }
+
+    // Add these new tabs to the baseTabs array
+    baseTabs.push({ id: "ai-tools", label: "AI Tools" })
+    baseTabs.push({ id: "ocr-scanner", label: "OCR Scanner" })
+    baseTabs.push({ id: "pdf-tools", label: "PDF Tools" })
 
     baseTabs.push({ id: "profile", label: "My Profile" })
 
@@ -575,6 +613,87 @@ export default function Dashboard() {
               <AcademicStaffManagement />
             </TabsContent>
           )}
+
+          {/* Add the new TabsContent sections before the profile tab */}
+          <TabsContent value="ai-tools" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Document Assistant</CardTitle>
+                <CardDescription>Get intelligent suggestions and generate content for your documents</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AIDocumentAssistant
+                  documentType="general"
+                  currentContent=""
+                  onContentUpdate={(content) => console.log("Content updated:", content)}
+                  onSuggestionApply={(suggestion) => console.log("Suggestion applied:", suggestion)}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ocr-scanner" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>OCR Text Scanner</CardTitle>
+                <CardDescription>Extract text from images and scanned documents</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <OCRScanner
+                  onTextExtracted={(text) => {
+                    console.log("Text extracted:", text)
+                    // You could show a success message or copy to clipboard
+                  }}
+                  onError={(error) => console.error("OCR Error:", error)}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pdf-tools" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>PDF Viewer & Tools</CardTitle>
+                <CardDescription>View, analyze, and work with PDF documents</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-4">Upload a PDF file to view and analyze</p>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          // Handle PDF file upload
+                          console.log("PDF uploaded:", file.name)
+                        }
+                      }}
+                      className="hidden"
+                      id="pdf-upload"
+                    />
+                    <label htmlFor="pdf-upload">
+                      <Button variant="outline" className="cursor-pointer">
+                        Choose PDF File
+                      </Button>
+                    </label>
+                  </div>
+
+                  {/* Demo PDF Viewer */}
+                  <div className="mt-6">
+                    <h4 className="font-medium mb-2">Sample Document Preview:</h4>
+                    <PDFViewer
+                      file="/placeholder.pdf"
+                      onError={(error) => console.error("PDF Error:", error)}
+                      onLoadSuccess={(numPages) => console.log(`PDF loaded with ${numPages} pages`)}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="profile">
             <UserProfile />

@@ -18,6 +18,7 @@ import {
   HelpCircle,
   ArrowLeft,
   Filter,
+  Bot,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -165,6 +166,15 @@ export default function LibraryPage() {
                 <Button variant="ghost" className="flex items-center space-x-2">
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back to Home</span>
+                </Button>
+              </Link>
+              <Link href="/ai-tools">
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <Bot className="h-4 w-4" />
+                  <span>AI Tools</span>
+                  <Badge variant="secondary" className="ml-1">
+                    New
+                  </Badge>
                 </Button>
               </Link>
               <Link href="/login">
