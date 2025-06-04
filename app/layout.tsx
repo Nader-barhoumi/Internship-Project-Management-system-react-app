@@ -8,9 +8,9 @@ import '../lib/polyfill'
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Academic Management System",
-  description: "Internship & Project Management Platform with AI & OCR Tools",
-    generator: 'v0.dev'
+  title: "Système de Gestion Académique",
+  description: "Plateforme de Gestion des Stages et Projets avec Outils IA et OCR",
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body className={inter.className}>
         <AuthProvider>{children}</AuthProvider>
       </body>

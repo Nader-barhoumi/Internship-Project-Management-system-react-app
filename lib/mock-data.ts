@@ -48,6 +48,17 @@ interface Document {
   updated_at: string
 }
 
+interface IndustrialTutor {
+  id: number
+  name: string
+  email: string
+  phone?: string
+  company_id: number
+  expertise_area: string
+  created_at: string
+  updated_at: string
+}
+
 // Initial mock data
 const mockStudents: Student[] = [
   {
@@ -187,12 +198,46 @@ const mockDocuments: Document[] = [
   },
 ]
 
+const mockIndustrialTutors: IndustrialTutor[] = [
+  {
+    id: 1,
+    name: "Khaled Zouari",
+    email: "khaled.zouari@techsolutions.tn",
+    phone: "+216 71 234 890",
+    company_id: 1,
+    expertise_area: "Web Development",
+    created_at: "2023-01-10T08:00:00Z",
+    updated_at: "2023-01-10T08:00:00Z",
+  },
+  {
+    id: 2,
+    name: "Salma Ben Slimane",
+    email: "salma.benslimane@medtech.tn",
+    phone: "+216 71 345 890",
+    company_id: 2,
+    expertise_area: "Data Science",
+    created_at: "2023-02-15T09:30:00Z",
+    updated_at: "2023-02-15T09:30:00Z",
+  },
+  {
+    id: 3,
+    name: "Amine Ghribi",
+    email: "amine.ghribi@financepro.tn",
+    phone: "+216 71 456 890",
+    company_id: 3,
+    expertise_area: "Machine Learning",
+    created_at: "2023-03-20T10:15:00Z",
+    updated_at: "2023-03-20T10:15:00Z",
+  },
+]
+
 // Mock data service
 class MockDataService {
   private students: Student[] = [...mockStudents]
   private companies: Company[] = [...mockCompanies]
   private internships: Internship[] = [...mockInternships]
   private documents: Document[] = [...mockDocuments]
+  private industrialTutors: IndustrialTutor[] = [...mockIndustrialTutors]
 
   // Helper to simulate network delay
   private async delay(ms = 500): Promise<void> {
@@ -585,6 +630,19 @@ class MockDataService {
 
     const deleted = this.documents.splice(index, 1)[0]
     return deleted
+  }
+
+  // Industrial Tutors
+  async getIndustrialTutorsByCompany(companyId: number) {
+    await this.delay()
+    // Filter tutors by company ID from the mock data
+    const tutors = mockIndustrialTutors.filter((tutor) => tutor.company_id === companyId)
+
+    return {
+      success: true,
+      data: tutors,
+      message: `${tutors.length} tutors found for company ID ${companyId}`,
+    }
   }
 
   // Dashboard stats

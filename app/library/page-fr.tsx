@@ -163,22 +163,16 @@ export default function LibraryPage() {
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/home">
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>Retour à l'Accueil</span>
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Retour à l'Accueil
                 </Button>
               </Link>
               <Link href="/ai-tools">
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  <Bot className="h-4 w-4" />
-                  <span>Outils IA</span>
-                  <Badge variant="secondary" className="ml-1">
-                    Nouveau
-                  </Badge>
+                <Button variant="outline" size="sm" className="flex items-center">
+                  <Bot className="h-4 w-4 mr-1" />
+                  Outils IA
                 </Button>
-              </Link>
-              <Link href="/login">
-                <Button className="bg-blue-600 hover:bg-blue-700">Se Connecter</Button>
               </Link>
             </div>
           </div>
@@ -200,38 +194,36 @@ export default function LibraryPage() {
         {/* Search and Filter */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Rechercher documents, modèles, guides..."
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input 
+                placeholder="Rechercher des documents par titre, description ou mot-clé..." 
+                className="pl-9" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
               />
             </div>
-            <Button variant="outline" className="flex items-center space-x-2">
-              <Filter className="h-4 w-4" />
-              <span>Filtrer</span>
-            </Button>
+            <div>
+              <Tabs defaultValue={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+                <TabsList className="grid grid-cols-2 md:flex md:grid-cols-none">
+                  {categories.map((cat) => (
+                    <TabsTrigger key={cat.id} value={cat.id} className="flex items-center">
+                      <div className="flex items-center">
+                        <cat.icon className="h-4 w-4 mr-1" />
+                        <span className="hidden md:inline">{cat.label}</span>
+                      </div>
+                      <Badge variant="secondary" className="ml-1 px-1">
+                        {cat.count}
+                      </Badge>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
-
-          {/* Category Tabs */}
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-            <TabsList className="grid w-full grid-cols-5">
-              {categories.map((category) => (
-                <TabsTrigger key={category.id} value={category.id} className="flex items-center space-x-2">
-                  <category.icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{category.label}</span>
-                  <Badge variant="secondary" className="ml-1">
-                    {category.count}
-                  </Badge>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
         </div>
 
-        {/* Results */}
+        {/* Results Count */}
         <div className="mb-4">
           <p className="text-gray-600">
             Affichage de {filteredDocuments.length} sur {documents.length} documents
@@ -283,25 +275,14 @@ export default function LibraryPage() {
             </Card>
           ))}
         </div>
-
-        {/* Empty State */}
-        {filteredDocuments.length === 0 && (
-          <div className="text-center py-12">
-            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun document trouvé</h3>
-            <p className="text-gray-500">Essayez d'ajuster vos termes de recherche ou filtres</p>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex items-center justify-center mb-4">
-            <GraduationCap className="h-6 w-6 text-blue-400 mr-2" />
-            <span className="font-semibold">Système de Gestion Académique</span>
-          </div>
-          <p className="text-gray-400">&copy; 2024 Système de Gestion Académique. Tous droits réservés.</p>
+      <footer className="bg-gray-100 border-t border-gray-200 py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-gray-500 text-sm">
+            © {new Date().getFullYear()} Système de Gestion des Projets de Stage. Tous droits réservés.
+          </p>
         </div>
       </footer>
     </div>

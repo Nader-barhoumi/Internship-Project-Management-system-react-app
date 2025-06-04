@@ -371,6 +371,22 @@ export class ApiClient {
       throw error
     }
   }
+
+  // Method to get tutors by company ID
+  async getTutorsByCompany(companyId: number) {
+    try {
+      // Using mock data service for now
+      const response = await mockDataService.getIndustrialTutorsByCompany(companyId);
+      return response;
+    } catch (error) {
+      console.error("Error fetching tutors by company:", error);
+      return { 
+        data: [], 
+        success: false, 
+        message: "Failed to fetch tutors" 
+      };
+    }
+  }
 }
 
 export const apiClient = new ApiClient()

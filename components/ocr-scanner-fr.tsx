@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -34,7 +33,7 @@ interface OCRScannerProps {
   onError?: (error: string) => void
 }
 
-export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps) {
+export default function OCRScannerFr({ onTextExtracted, onError }: OCRScannerProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<OCRResult | null>(null)
@@ -60,7 +59,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
     setProgress(0)
 
     try {
-      const worker = await createWorker("eng", 1, {
+      const worker = await createWorker("fra", 1, {
         logger: (m) => {
           if (m.status === "recognizing text") {
             setProgress(Math.round(m.progress * 100))
@@ -87,8 +86,8 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
 
       await worker.terminate()
     } catch (error) {
-      console.error("OCR Error:", error)
-      const errorMessage = error instanceof Error ? error.message : "OCR processing failed"
+      console.error("Erreur OCR:", error)
+      const errorMessage = error instanceof Error ? error.message : "Le traitement OCR a échoué"
       onError?.(errorMessage)
     } finally {
       setIsProcessing(false)
@@ -100,9 +99,9 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
     if (result?.text) {
       try {
         await navigator.clipboard.writeText(result.text)
-        // You could add a toast notification here
+        // Vous pourriez ajouter une notification toast ici
       } catch (error) {
-        console.error("Failed to copy text:", error)
+        console.error("Impossible de copier le texte:", error)
       }
     }
   }
@@ -113,7 +112,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = "extracted-text.txt"
+      a.download = "texte-extrait.txt"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -128,9 +127,9 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
   }
 
   const getConfidenceBadge = (confidence: number) => {
-    if (confidence >= 80) return { variant: "default" as const, label: "High" }
-    if (confidence >= 60) return { variant: "secondary" as const, label: "Medium" }
-    return { variant: "destructive" as const, label: "Low" }
+    if (confidence >= 80) return { variant: "default" as const, label: "Élevée" }
+    if (confidence >= 60) return { variant: "secondary" as const, label: "Moyenne" }
+    return { variant: "destructive" as const, label: "Faible" }
   }
 
   return (
@@ -139,26 +138,26 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
         <CardHeader>
           <div className="flex items-center space-x-2">
             <Scan className="h-5 w-5 text-blue-600" />
-            <CardTitle>OCR Text Scanner</CardTitle>
+            <CardTitle>Scanner de Texte OCR</CardTitle>
           </div>
           <CardDescription>
-            Extract text from images and scanned documents using advanced OCR technology
+            Extrayez du texte à partir d'images et de documents numérisés grâce à une technologie OCR avancée
           </CardDescription>
         </CardHeader>
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="upload">Upload & Scan</TabsTrigger>
-          <TabsTrigger value="results">Extracted Text</TabsTrigger>
-          <TabsTrigger value="analysis">Quality Analysis</TabsTrigger>
+          <TabsTrigger value="upload">Télécharger & Scanner</TabsTrigger>
+          <TabsTrigger value="results">Texte Extrait</TabsTrigger>
+          <TabsTrigger value="analysis">Analyse de Qualité</TabsTrigger>
         </TabsList>
 
         <TabsContent value="upload" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Upload Document</CardTitle>
-              <CardDescription>Select an image or PDF file to extract text from</CardDescription>
+              <CardTitle className="text-lg">Télécharger un Document</CardTitle>
+              <CardDescription>Sélectionnez une image ou un fichier PDF pour en extraire le texte</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
@@ -175,7 +174,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
                     <div className="max-w-md mx-auto">
                       <img
                         src={previewUrl || "/placeholder.svg"}
-                        alt="Preview"
+                        alt="Aperçu"
                         className="max-h-64 mx-auto rounded-lg shadow-md"
                       />
                     </div>
@@ -188,8 +187,8 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
                   <div className="space-y-4">
                     <ImageIcon className="h-12 w-12 text-gray-400 mx-auto" />
                     <div>
-                      <p className="text-lg font-medium text-gray-900">Upload a document</p>
-                      <p className="text-sm text-gray-500">Supports JPG, PNG, PDF files up to 10MB</p>
+                      <p className="text-lg font-medium text-gray-900">Télécharger un document</p>
+                      <p className="text-sm text-gray-500">Prend en charge les fichiers JPG, PNG, PDF jusqu'à 10 Mo</p>
                     </div>
                   </div>
                 )}
@@ -201,13 +200,13 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
                     className="flex items-center space-x-2"
                   >
                     <Upload className="h-4 w-4" />
-                    <span>{selectedFile ? "Change File" : "Select File"}</span>
+                    <span>{selectedFile ? "Changer de Fichier" : "Sélectionner un Fichier"}</span>
                   </Button>
 
                   {selectedFile && (
                     <Button onClick={processOCR} disabled={isProcessing} className="flex items-center space-x-2">
                       {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scan className="h-4 w-4" />}
-                      <span>{isProcessing ? "Processing..." : "Extract Text"}</span>
+                      <span>{isProcessing ? "Traitement en cours..." : "Extraire le Texte"}</span>
                     </Button>
                   )}
                 </div>
@@ -216,7 +215,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
               {isProcessing && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span>Processing document...</span>
+                    <span>Traitement du document...</span>
                     <span>{progress}%</span>
                   </div>
                   <Progress value={progress} className="w-full" />
@@ -232,13 +231,13 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg">Extracted Text</CardTitle>
+                    <CardTitle className="text-lg">Texte Extrait</CardTitle>
                     <CardDescription>
-                      Text extracted from your document with {result.confidence.toFixed(1)}% confidence
+                      Texte extrait de votre document avec {result.confidence.toFixed(1)}% de confiance
                     </CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge {...getConfidenceBadge(result.confidence)}>{result.confidence.toFixed(1)}% Confidence</Badge>
+                    <Badge {...getConfidenceBadge(result.confidence)}>{result.confidence.toFixed(1)}% de Confiance</Badge>
                   </div>
                 </div>
               </CardHeader>
@@ -247,17 +246,17 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
                   value={result.text}
                   readOnly
                   className="min-h-[300px] font-mono text-sm"
-                  placeholder="Extracted text will appear here..."
+                  placeholder="Le texte extrait apparaîtra ici..."
                 />
 
                 <div className="flex space-x-2">
                   <Button onClick={copyToClipboard} variant="outline" size="sm" className="flex items-center space-x-1">
                     <Copy className="h-3 w-3" />
-                    <span>Copy Text</span>
+                    <span>Copier le Texte</span>
                   </Button>
                   <Button onClick={downloadText} variant="outline" size="sm" className="flex items-center space-x-1">
                     <Download className="h-3 w-3" />
-                    <span>Download</span>
+                    <span>Télécharger</span>
                   </Button>
                   <Button
                     onClick={() => onTextExtracted(result.text)}
@@ -265,7 +264,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
                     className="flex items-center space-x-1"
                   >
                     <FileText className="h-3 w-3" />
-                    <span>Use in Document</span>
+                    <span>Utiliser dans le Document</span>
                   </Button>
                 </div>
               </CardContent>
@@ -274,7 +273,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                No text extracted yet. Upload and scan a document to see results here.
+                Aucun texte extrait pour le moment. Téléchargez et scannez un document pour voir les résultats ici.
               </AlertDescription>
             </Alert>
           )}
@@ -285,12 +284,12 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Overall Quality</CardTitle>
+                  <CardTitle className="text-base">Qualité Globale</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Confidence Score</span>
+                      <span className="text-sm">Score de Confiance</span>
                       <span className={`font-medium ${getConfidenceColor(result.confidence)}`}>
                         {result.confidence.toFixed(1)}%
                       </span>
@@ -298,12 +297,12 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
                     <Progress value={result.confidence} />
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Words Detected</span>
+                      <span className="text-sm">Mots Détectés</span>
                       <span className="font-medium">{result.words.length}</span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Characters</span>
+                      <span className="text-sm">Caractères</span>
                       <span className="font-medium">{result.text.length}</span>
                     </div>
                   </div>
@@ -312,7 +311,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Word Confidence</CardTitle>
+                  <CardTitle className="text-base">Confiance par Mot</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -330,7 +329,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
                       </div>
                     ))}
                     {result.words.length > 10 && (
-                      <p className="text-xs text-gray-500 text-center">... and {result.words.length - 10} more words</p>
+                      <p className="text-xs text-gray-500 text-center">... et {result.words.length - 10} autres mots</p>
                     )}
                   </div>
                 </CardContent>
@@ -340,7 +339,7 @@ export default function OCRScanner({ onTextExtracted, onError }: OCRScannerProps
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                No analysis available. Process a document first to see quality metrics.
+                Aucune analyse disponible. Traitez d'abord un document pour voir les métriques de qualité.
               </AlertDescription>
             </Alert>
           )}

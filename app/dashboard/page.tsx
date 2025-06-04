@@ -28,7 +28,7 @@ import AcademicStaffManagement from "@/components/academic-staff-management"
 import UserProfile from "@/components/user-profile"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
-import { permissions } from "@/lib/permissions"
+import { permissions, type UserRole } from "@/lib/permissions"
 import RoleBasedWrapper from "@/components/role-based-wrapper"
 import {
   DropdownMenu,
@@ -45,6 +45,8 @@ import PDFViewer from "@/components/pdf-viewer"
 export default function Dashboard() {
   const { user, userRole, isAuthenticated, logout } = useAuth()
   const router = useRouter()
+  // Cast userRole to UserRole type for type safety
+  const typedUserRole = userRole as UserRole
 
   const [activeTab, setActiveTab] = useState("overview")
   const [stats, setStats] = useState({
@@ -110,7 +112,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <p className="mt-2 text-gray-600">Chargement...</p>
         </div>
       </div>
     )
@@ -143,7 +145,7 @@ export default function Dashboard() {
         {trend && (
           <Badge variant={trend > 0 ? "default" : "secondary"} className="mt-1">
             {trend > 0 ? "+" : ""}
-            {trend}% from last month
+            {trend}% par rapport au mois dernier
           </Badge>
         )}
       </CardContent>
@@ -156,20 +158,20 @@ export default function Dashboard() {
         return [
           {
             type: "internship",
-            message: "Your internship application was approved",
-            time: "2 hours ago",
+            message: "Votre demande de stage a été approuvée",
+            time: "il y a 2 heures",
             status: "completed",
           },
           {
             type: "document",
-            message: "Please sign your internship agreement",
-            time: "1 day ago",
+            message: "Veuillez signer votre convention de stage",
+            time: "il y a 1 jour",
             status: "pending",
           },
           {
             type: "project",
-            message: "PFE project proposal submitted",
-            time: "3 days ago",
+            message: "Proposition de projet PFE soumise",
+            time: "il y a 3 jours",
             status: "review",
           },
         ]
@@ -177,20 +179,20 @@ export default function Dashboard() {
         return [
           {
             type: "project",
-            message: "New PFE project proposal requires review",
-            time: "1 hour ago",
+            message: "Nouvelle proposition de projet PFE à examiner",
+            time: "il y a 1 heure",
             status: "pending",
           },
           {
             type: "internship",
-            message: "Student evaluation form submitted",
-            time: "4 hours ago",
+            message: "Formulaire d'évaluation d'étudiant soumis",
+            time: "il y a 4 heures",
             status: "review",
           },
           {
             type: "student",
-            message: "Student requested supervision meeting",
-            time: "1 day ago",
+            message: "Un étudiant a demandé une réunion d'encadrement",
+            time: "il y a 1 jour",
             status: "info",
           },
         ]
@@ -198,20 +200,20 @@ export default function Dashboard() {
         return [
           {
             type: "internship",
-            message: "New intern started at your company",
-            time: "2 hours ago",
+            message: "Nouvel stagiaire a commencé dans votre entreprise",
+            time: "il y a 2 heures",
             status: "info",
           },
           {
             type: "document",
-            message: "Internship evaluation due next week",
-            time: "1 day ago",
+            message: "Évaluation de stage à rendre la semaine prochaine",
+            time: "il y a 1 jour",
             status: "pending",
           },
           {
             type: "student",
-            message: "Intern submitted weekly report",
-            time: "2 days ago",
+            message: "Le stagiaire a soumis un rapport hebdomadaire",
+            time: "il y a 2 jours",
             status: "completed",
           },
         ]
@@ -219,23 +221,23 @@ export default function Dashboard() {
         return [
           {
             type: "internship",
-            message: "New internship application from John Doe",
-            time: "2 hours ago",
+            message: "Nouvelle demande de stage de John Doe",
+            time: "il y a 2 heures",
             status: "pending",
           },
           {
             type: "document",
-            message: "Internship agreement signed by TechCorp",
-            time: "4 hours ago",
+            message: "Convention de stage signée par TechCorp",
+            time: "il y a 4 heures",
             status: "completed",
           },
           {
             type: "project",
-            message: 'PFE project "AI Chatbot" submitted for review',
-            time: "1 day ago",
+            message: 'Projet PFE "Chatbot IA" soumis pour examen',
+            time: "il y a 1 jour",
             status: "review",
           },
-          { type: "student", message: "Student profile updated: Jane Smith", time: "2 days ago", status: "info" },
+          { type: "student", message: "Profil étudiant mis à jour: Jane Smith", time: "il y a 2 jours", status: "info" },
         ]
       }
     }
@@ -243,8 +245,8 @@ export default function Dashboard() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Latest updates relevant to your role</CardDescription>
+          <CardTitle>Activité Récente</CardTitle>
+          <CardDescription>Dernières mises à jour pertinentes pour votre rôle</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {getActivitiesByRole().map((activity, index) => (
@@ -269,7 +271,10 @@ export default function Dashboard() {
                   activity.status === "completed" ? "default" : activity.status === "pending" ? "secondary" : "outline"
                 }
               >
-                {activity.status}
+                {activity.status === "completed" ? "terminé" : 
+                 activity.status === "pending" ? "en attente" : 
+                 activity.status === "review" ? "en examen" : 
+                 activity.status === "info" ? "information" : activity.status}
               </Badge>
             </div>
           ))}
@@ -281,8 +286,8 @@ export default function Dashboard() {
   const QuickActions = () => (
     <Card>
       <CardHeader>
-        <CardTitle>Quick Actions</CardTitle>
-        <CardDescription>Available actions for your role</CardDescription>
+        <CardTitle>Actions Rapides</CardTitle>
+        <CardDescription>Actions disponibles pour votre rôle</CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-3">
         <RoleBasedWrapper allowedRoles={["admin", "teacher"]}>
@@ -292,7 +297,7 @@ export default function Dashboard() {
             onClick={() => setQuickActionDialogs((prev) => ({ ...prev, student: true }))}
           >
             <Plus className="h-5 w-5" />
-            <span className="text-sm">New Student</span>
+            <span className="text-sm">Nouvel Étudiant</span>
           </Button>
         </RoleBasedWrapper>
 
@@ -303,7 +308,7 @@ export default function Dashboard() {
             onClick={() => setQuickActionDialogs((prev) => ({ ...prev, company: true }))}
           >
             <Building2 className="h-5 w-5" />
-            <span className="text-sm">Add Company</span>
+            <span className="text-sm">Ajouter Entreprise</span>
           </Button>
         </RoleBasedWrapper>
 
@@ -314,7 +319,7 @@ export default function Dashboard() {
             onClick={() => setQuickActionDialogs((prev) => ({ ...prev, document: true }))}
           >
             <FileText className="h-5 w-5" />
-            <span className="text-sm">Create Document</span>
+            <span className="text-sm">Créer Document</span>
           </Button>
         </RoleBasedWrapper>
 
@@ -325,7 +330,7 @@ export default function Dashboard() {
             onClick={() => setQuickActionDialogs((prev) => ({ ...prev, internship: true }))}
           >
             <GraduationCap className="h-5 w-5" />
-            <span className="text-sm">New Internship</span>
+            <span className="text-sm">Nouveau Stage</span>
           </Button>
         </RoleBasedWrapper>
 
@@ -333,14 +338,14 @@ export default function Dashboard() {
         <RoleBasedWrapper allowedRoles={["student"]}>
           <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
             <FileText className="h-5 w-5" />
-            <span className="text-sm">Submit Report</span>
+            <span className="text-sm">Soumettre Rapport</span>
           </Button>
         </RoleBasedWrapper>
 
         <RoleBasedWrapper allowedRoles={["student"]}>
           <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
             <GraduationCap className="h-5 w-5" />
-            <span className="text-sm">View Internship</span>
+            <span className="text-sm">Voir Stage</span>
           </Button>
         </RoleBasedWrapper>
 
@@ -351,7 +356,7 @@ export default function Dashboard() {
           onClick={() => setActiveTab("ai-tools")}
         >
           <Bot className="h-5 w-5" />
-          <span className="text-sm">AI Assistant</span>
+          <span className="text-sm">Assistant IA</span>
         </Button>
 
         <Button
@@ -360,7 +365,7 @@ export default function Dashboard() {
           onClick={() => setActiveTab("ocr-scanner")}
         >
           <Scan className="h-5 w-5" />
-          <span className="text-sm">OCR Scanner</span>
+          <span className="text-sm">Scanner OCR</span>
         </Button>
 
         <Button
@@ -369,7 +374,7 @@ export default function Dashboard() {
           onClick={() => setActiveTab("pdf-tools")}
         >
           <FileText className="h-5 w-5" />
-          <span className="text-sm">PDF Tools</span>
+          <span className="text-sm">Outils PDF</span>
         </Button>
       </CardContent>
     </Card>
@@ -377,34 +382,34 @@ export default function Dashboard() {
 
   // Get available tabs based on user role
   const getAvailableTabs = () => {
-    const baseTabs = [{ id: "overview", label: "Overview" }]
+    const baseTabs = [{ id: "overview", label: "Aperçu" }]
 
-    if (permissions.canViewStudents(userRole)) {
-      baseTabs.push({ id: "students", label: "Students" })
+    if (permissions.canViewStudents(typedUserRole)) {
+      baseTabs.push({ id: "students", label: "Étudiants" })
     }
 
-    if (permissions.canViewInternships(userRole)) {
-      baseTabs.push({ id: "internships", label: "Internships" })
+    if (permissions.canViewInternships(typedUserRole)) {
+      baseTabs.push({ id: "internships", label: "Stages" })
     }
 
-    if (permissions.canViewDocuments(userRole)) {
+    if (permissions.canViewDocuments(typedUserRole)) {
       baseTabs.push({ id: "documents", label: "Documents" })
     }
 
-    if (permissions.canViewCompanies(userRole)) {
-      baseTabs.push({ id: "companies", label: "Companies" })
+    if (permissions.canViewCompanies(typedUserRole)) {
+      baseTabs.push({ id: "companies", label: "Entreprises" })
     }
 
-    if (permissions.canViewAcademicStaff(userRole)) {
-      baseTabs.push({ id: "staff", label: "Academic Staff" })
+    if (permissions.canViewAcademicStaff(typedUserRole)) {
+      baseTabs.push({ id: "staff", label: "Personnel Académique" })
     }
 
     // Add these new tabs to the baseTabs array
-    baseTabs.push({ id: "ai-tools", label: "AI Tools" })
-    baseTabs.push({ id: "ocr-scanner", label: "OCR Scanner" })
-    baseTabs.push({ id: "pdf-tools", label: "PDF Tools" })
+    baseTabs.push({ id: "ai-tools", label: "Outils IA" })
+    baseTabs.push({ id: "ocr-scanner", label: "Scanner OCR" })
+    baseTabs.push({ id: "pdf-tools", label: "Outils PDF" })
 
-    baseTabs.push({ id: "profile", label: "My Profile" })
+    baseTabs.push({ id: "profile", label: "Mon Profil" })
 
     return baseTabs
   }
@@ -420,12 +425,12 @@ export default function Dashboard() {
             <div className="flex items-center">
               <GraduationCap className="h-8 w-8 text-blue-600 mr-3" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Academic Management System</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Système de Gestion Académique</h1>
                 <p className="text-sm text-gray-500">
-                  {userRole === "admin" && "Administrator Dashboard"}
-                  {userRole === "teacher" && "Teacher Dashboard"}
-                  {userRole === "student" && "Student Portal"}
-                  {userRole === "industrial_tutor" && "Company Supervisor Dashboard"}
+                  {userRole === "admin" && "Tableau de Bord Administrateur"}
+                  {userRole === "teacher" && "Tableau de Bord Enseignant"}
+                  {userRole === "student" && "Portail Étudiant"}
+                  {userRole === "industrial_tutor" && "Tableau de Bord Tuteur Industriel"}
                 </p>
               </div>
             </div>
@@ -446,7 +451,7 @@ export default function Dashboard() {
                   className="flex items-center space-x-1"
                 >
                   <Home className="h-4 w-4" />
-                  <span>Home</span>
+                  <span>Accueil</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -455,7 +460,7 @@ export default function Dashboard() {
                   className="flex items-center space-x-1"
                 >
                   <BookOpen className="h-4 w-4" />
-                  <span>Library</span>
+                  <span>Bibliothèque</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -464,7 +469,7 @@ export default function Dashboard() {
                   className="flex items-center space-x-1 text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
+                  <span>Déconnexion</span>
                 </Button>
               </div>
 
@@ -475,8 +480,13 @@ export default function Dashboard() {
                       <span className="text-white text-sm font-medium">{user?.name?.charAt(0) || "U"}</span>
                     </div>
                     <div className="hidden md:block text-left">
-                      <p className="text-sm font-medium">{user?.name || "User"}</p>
-                      <p className="text-xs text-gray-500 capitalize">{userRole?.replace("_", " ")}</p>
+                      <p className="text-sm font-medium">{user?.name || "Utilisateur"}</p>
+                      <p className="text-xs text-gray-500 capitalize">
+                        {userRole === "student" && "Étudiant"}
+                        {userRole === "teacher" && "Enseignant"}
+                        {userRole === "admin" && "Administrateur"}
+                        {userRole === "industrial_tutor" && "Tuteur Industriel"}
+                      </p>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -487,7 +497,7 @@ export default function Dashboard() {
                       className="w-full flex items-center px-2 py-1.5 text-sm cursor-pointer"
                     >
                       <Home className="mr-2 h-4 w-4" />
-                      <span>Home</span>
+                      <span>Accueil</span>
                     </button>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -496,7 +506,7 @@ export default function Dashboard() {
                       className="w-full flex items-center px-2 py-1.5 text-sm cursor-pointer"
                     >
                       <BookOpen className="mr-2 h-4 w-4" />
-                      <span>Library</span>
+                      <span>Bibliothèque</span>
                     </button>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -506,7 +516,7 @@ export default function Dashboard() {
                       className="w-full flex items-center px-2 py-1.5 text-sm cursor-pointer"
                     >
                       <User className="mr-2 h-4 w-4" />
-                      <span>My Profile</span>
+                      <span>Mon Profil</span>
                     </button>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -516,7 +526,7 @@ export default function Dashboard() {
                       className="w-full flex items-center px-2 py-1.5 text-sm cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      <span>Déconnexion</span>
                     </button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -544,31 +554,31 @@ export default function Dashboard() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatCard
-                title={userRole === "student" ? "My Status" : "Total Students"}
+                title={userRole === "student" ? "Mon Statut" : "Total Étudiants"}
                 value={stats.totalStudents}
                 icon={Users}
-                description={userRole === "student" ? "Active student" : "Registered students"}
+                description={userRole === "student" ? "Étudiant actif" : "Étudiants inscrits"}
                 trend={userRole === "admin" ? 5 : undefined}
               />
               <StatCard
-                title={userRole === "student" ? "My Internship" : "Active Internships"}
+                title={userRole === "student" ? "Mon Stage" : "Stages Actifs"}
                 value={stats.activeInternships}
                 icon={Building2}
-                description={userRole === "student" ? "Current internship" : "Ongoing internships"}
+                description={userRole === "student" ? "Stage actuel" : "Stages en cours"}
                 trend={userRole === "admin" ? 12 : undefined}
               />
               <StatCard
-                title="Pending Documents"
+                title="Documents en Attente"
                 value={stats.pendingDocuments}
                 icon={FileText}
-                description={userRole === "student" ? "Documents to sign" : "Awaiting signatures"}
+                description={userRole === "student" ? "Documents à signer" : "En attente de signatures"}
                 trend={userRole === "admin" ? -8 : undefined}
               />
               <StatCard
-                title="Completed Projects"
+                title="Projets Complétés"
                 value={stats.completedProjects}
                 icon={CheckCircle}
-                description={userRole === "student" ? "Projects completed" : "PFE projects finished"}
+                description={userRole === "student" ? "Projets terminés" : "Projets PFE terminés"}
                 trend={userRole === "admin" ? 15 : undefined}
               />
             </div>
@@ -584,31 +594,31 @@ export default function Dashboard() {
             </div>
           </TabsContent>
 
-          {permissions.canViewStudents(userRole) && (
+          {permissions.canViewStudents(typedUserRole) && (
             <TabsContent value="students">
               <StudentManagement />
             </TabsContent>
           )}
 
-          {permissions.canViewInternships(userRole) && (
+          {permissions.canViewInternships(typedUserRole) && (
             <TabsContent value="internships">
               <InternshipManagement />
             </TabsContent>
           )}
 
-          {permissions.canViewDocuments(userRole) && (
+          {permissions.canViewDocuments(typedUserRole) && (
             <TabsContent value="documents">
               <DocumentWorkflow />
             </TabsContent>
           )}
 
-          {permissions.canViewCompanies(userRole) && (
+          {permissions.canViewCompanies(typedUserRole) && (
             <TabsContent value="companies">
               <CompanyManagement />
             </TabsContent>
           )}
 
-          {permissions.canViewAcademicStaff(userRole) && (
+          {permissions.canViewAcademicStaff(typedUserRole) && (
             <TabsContent value="staff">
               <AcademicStaffManagement />
             </TabsContent>
@@ -618,15 +628,15 @@ export default function Dashboard() {
           <TabsContent value="ai-tools" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>AI Document Assistant</CardTitle>
-                <CardDescription>Get intelligent suggestions and generate content for your documents</CardDescription>
+                <CardTitle>Assistant IA pour Documents</CardTitle>
+                <CardDescription>Obtenez des suggestions intelligentes et générez du contenu pour vos documents</CardDescription>
               </CardHeader>
               <CardContent>
                 <AIDocumentAssistant
                   documentType="general"
                   currentContent=""
-                  onContentUpdate={(content) => console.log("Content updated:", content)}
-                  onSuggestionApply={(suggestion) => console.log("Suggestion applied:", suggestion)}
+                  onContentUpdate={(content) => console.log("Contenu mis à jour:", content)}
+                  onSuggestionApply={(suggestion) => console.log("Suggestion appliquée:", suggestion)}
                 />
               </CardContent>
             </Card>
@@ -635,16 +645,16 @@ export default function Dashboard() {
           <TabsContent value="ocr-scanner" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>OCR Text Scanner</CardTitle>
-                <CardDescription>Extract text from images and scanned documents</CardDescription>
+                <CardTitle>Scanner OCR de Texte</CardTitle>
+                <CardDescription>Extrayez du texte à partir d'images et de documents numérisés</CardDescription>
               </CardHeader>
               <CardContent>
                 <OCRScanner
                   onTextExtracted={(text) => {
-                    console.log("Text extracted:", text)
+                    console.log("Texte extrait:", text)
                     // You could show a success message or copy to clipboard
                   }}
-                  onError={(error) => console.error("OCR Error:", error)}
+                  onError={(error) => console.error("Erreur OCR:", error)}
                 />
               </CardContent>
             </Card>
@@ -653,14 +663,14 @@ export default function Dashboard() {
           <TabsContent value="pdf-tools" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>PDF Viewer & Tools</CardTitle>
-                <CardDescription>View, analyze, and work with PDF documents</CardDescription>
+                <CardTitle>Visionneuse et Outils PDF</CardTitle>
+                <CardDescription>Visualisez, analysez et travaillez avec des documents PDF</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                     <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">Upload a PDF file to view and analyze</p>
+                    <p className="text-gray-600 mb-4">Téléchargez un fichier PDF pour le visualiser et l'analyser</p>
                     <input
                       type="file"
                       accept=".pdf"
@@ -668,7 +678,7 @@ export default function Dashboard() {
                         const file = e.target.files?.[0]
                         if (file) {
                           // Handle PDF file upload
-                          console.log("PDF uploaded:", file.name)
+                          console.log("PDF téléchargé:", file.name)
                         }
                       }}
                       className="hidden"
@@ -676,18 +686,18 @@ export default function Dashboard() {
                     />
                     <label htmlFor="pdf-upload">
                       <Button variant="outline" className="cursor-pointer">
-                        Choose PDF File
+                        Choisir un fichier PDF
                       </Button>
                     </label>
                   </div>
 
                   {/* Demo PDF Viewer */}
                   <div className="mt-6">
-                    <h4 className="font-medium mb-2">Sample Document Preview:</h4>
+                    <h4 className="font-medium mb-2">Aperçu du document exemple :</h4>
                     <PDFViewer
                       file="/placeholder.pdf"
-                      onError={(error) => console.error("PDF Error:", error)}
-                      onLoadSuccess={(numPages) => console.log(`PDF loaded with ${numPages} pages`)}
+                      onError={(error) => console.error("Erreur PDF:", error)}
+                      onLoadSuccess={(numPages) => console.log(`PDF chargé avec ${numPages} pages`)}
                     />
                   </div>
                 </div>
@@ -704,11 +714,14 @@ export default function Dashboard() {
           dialogs={quickActionDialogs}
           setDialogs={setQuickActionDialogs}
           onSuccess={(type) => {
-            console.log(`${type} created successfully`)
-            if (type === "student" && permissions.canViewStudents(userRole)) setActiveTab("students")
-            if (type === "company" && permissions.canViewCompanies(userRole)) setActiveTab("companies")
-            if (type === "internship" && permissions.canViewInternships(userRole)) setActiveTab("internships")
-            if (type === "document" && permissions.canViewDocuments(userRole)) setActiveTab("documents")
+            console.log(`${type === "student" ? "Étudiant" : 
+                         type === "company" ? "Entreprise" : 
+                         type === "internship" ? "Stage" : 
+                         type === "document" ? "Document" : type} créé avec succès`)
+            if (type === "student" && permissions.canViewStudents(typedUserRole)) setActiveTab("students")
+            if (type === "company" && permissions.canViewCompanies(typedUserRole)) setActiveTab("companies")
+            if (type === "internship" && permissions.canViewInternships(typedUserRole)) setActiveTab("internships")
+            if (type === "document" && permissions.canViewDocuments(typedUserRole)) setActiveTab("documents")
           }}
         />
       </main>

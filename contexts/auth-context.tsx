@@ -2,10 +2,11 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { authService, type User } from "@/lib/auth-service"
+import { type UserRole } from "@/lib/permissions"
 
 interface AuthContextType {
   user: User | null
-  userRole: string
+  userRole: UserRole
   login: (email: string, password: string, role: string) => Promise<{ success: boolean; error?: string }>
   register: (userData: any) => Promise<{ success: boolean; error?: string }>
   updateProfile: (profileData: any) => Promise<{ success: boolean; error?: string }>
@@ -149,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        userRole: user?.role || "guest",
+        userRole: user?.role || "student",
         login,
         register,
         updateProfile,
